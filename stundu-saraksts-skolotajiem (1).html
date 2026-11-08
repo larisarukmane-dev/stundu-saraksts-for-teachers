@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="lv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Stundu saraksts</title>
+<style>
+:root{--bg:#f6f7fb;--card:#fff;--tx:#1d2433;--mut:#6b7385;--line:#e3e6ef;--acc:#3b5bdb;--today:#fff6d6;--or:#e8590c;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#12151c;--card:#1b2030;--tx:#e8ebf4;--mut:#9aa3b8;--line:#2b3247;--acc:#8ea2ff;--today:#3a3416}}
+html{color-scheme:light dark}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+.w{max-width:1100px;margin:auto;padding:0 16px}
+h1{margin:0;font-size:1.5rem;padding-top:16px}
+.sub{color:var(--mut);font-size:.9rem;margin:4px 0 10px}
+.top,.tabs{display:flex;gap:6px;overflow-x:auto;padding:6px 0}
+.top button,.tabs button{border:1px solid var(--line);background:var(--card);color:var(--tx);padding:8px 13px;border-radius:999px;font-size:.9rem;white-space:nowrap;cursor:pointer}
+.top button.on,.tabs button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+.v{display:none}.v.on{display:block}
+.bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:6px 0}
+select,.sm{border:1px solid var(--line);background:var(--card);color:var(--tx);border-radius:8px;padding:7px 10px;font-size:.95rem}
+#app{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;padding:8px 0 20px}
+.day,.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.day.today{background:var(--today)}
+.day h2{margin:0 0 8px;font-size:1.1rem;display:flex;justify-content:space-between;align-items:baseline}
+.day h2 span{font-size:.85rem;color:var(--mut);font-weight:400}
+.l{display:flex;gap:10px;padding:7px 0;border-top:1px solid var(--line);align-items:flex-start}
+.n{width:22px;flex:none;text-align:right;color:var(--mut);font-weight:600;cursor:pointer;user-select:none}
+.dot{width:8px;height:8px;border-radius:50%;margin-top:7px;flex:none}
+.tm{width:40px;flex:none;font-size:.72rem;line-height:1.25;color:var(--mut);text-align:center}
+th small{font-weight:400;font-size:.72rem}
+.m-r .add,.m-r .del,.m-r .bar .sm,.m-r #reset,.m-r .adm,.m-r .foot,.m-r [data-v="l"],.m-a [data-v="d"]{display:none!important}
+.m-r .n{pointer-events:none}
+.m-a .s small{display:none}
+.s{flex:1;outline:none;min-width:0}
+.s small{display:block;color:var(--mut)}
+.s b{font-weight:500}
+.l.ch{background:rgba(240,140,0,.15);border-radius:8px}
+.l.x .s b{text-decoration:line-through;opacity:.6}
+.l.ch .s::after,.l.x .s::after{display:inline-block;margin-top:3px;font-size:.72rem;font-weight:700;padding:1px 7px;border-radius:999px;color:#fff}
+.l.ch .s::after{content:"Izmaiņa";background:var(--or)}
+.l.x .s::after{content:"Atcelta";background:#c92a2a}
+.del{border:0;background:none;color:var(--mut);font-size:1.3rem;line-height:1;padding:0 4px;cursor:pointer}
+.add{margin-top:8px;width:100%;border:1px dashed var(--line);background:none;color:var(--acc);border-radius:8px;padding:8px;font-size:.9rem;cursor:pointer}
+.card.chg{border-left:4px solid var(--or)}
+.ci{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:flex-start;padding:9px 0;border-top:1px solid var(--line)}
+.ci [data-f]{outline:none}
+[data-f]:empty::before{content:attr(data-ph);color:var(--mut);font-weight:400}
+.cd{font-weight:700;color:var(--or);min-width:48px}
+.cg{font-weight:600;min-width:48px}
+.cl{min-width:40px;color:var(--mut)}
+.ct{flex:1 1 100%;min-width:0}
+.empty{color:var(--mut);margin:4px 0}
+.sc{overflow-x:auto;margin:6px 0 14px}
+table{border-collapse:collapse;width:100%;font-size:.88rem}
+th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:center;white-space:nowrap}
+th{color:var(--mut);font-weight:600}
+td:first-child,th:first-child{text-align:left;position:sticky;left:0;background:var(--card)}
+td.b{background:rgba(59,91,219,.18);font-weight:600}
+td.clash{background:#c92a2a;color:#fff;font-weight:700}
+h3{margin:14px 0 4px;font-size:1.05rem}
+.note{color:var(--mut);font-size:.8rem;padding:0 0 24px}
+@media (max-width:700px){.stabs{display:flex}.day{display:none}.day.show{display:block}#app{display:block}}
+@media (min-width:701px){.stabs{display:none}}
+</style>
+</head>
+<body>
+<div class="w">
+<h1>Stundu saraksts</h1>
+<p class="sub">09.11.2026. – 13.11.2026.</p>
+<div class="top" id="top"><button data-v="s">Saraksts</button><button data-v="c">Stundu izmaiņas</button><button data-v="d">Noslodze pa dienām</button><button data-v="l">Noslodze nedēļā</button></div>
+
+<section class="v" id="vs">
+ <div class="bar"><select id="gsel"></select><button class="sm" id="gadd">+ Grupa</button><button class="sm" id="gdel">Dzēst grupu</button></div>
+ <div class="tabs stabs" id="tabs"></div>
+ <div id="app"></div>
+ <p class="note adm">Nosaukums – pieskarties un labot · numurs – izmaiņa/atcelta · × dzēš stundu. <button class="sm" id="reset">Atjaunot sākotnējo</button></p>
+</section>
+
+<section class="v" id="vc"><div id="chg"></div></section>
+
+<section class="v" id="vl">
+ <h3>Stundu skaits nedēļā</h3>
+ <div class="sc" id="wk"></div>
+ <p class="note">Skolotāji tiek ņemti no saraksta (iekavās aiz priekšmeta). Atceltas stundas netiek skaitītas.</p>
+</section>
+
+<section class="v" id="vd">
+ <h3>Skolotāju noslodze pa dienām</h3>
+ <div class="tabs" id="ltabs"></div>
+ <div class="sc" id="dd"></div>
+ <p class="note">Skolotāji tiek ņemti no saraksta (iekavās aiz priekšmeta). Atceltas stundas netiek skaitītas. Sarkana šūna – skolotājam vienā stundā ir dažādi priekšmeti dažādās grupās. Ja priekšmets ir tas pats, grupas redzamas kopā (piem., AV1-2+DT1-3), tā ir kopējā stunda.</p>
+</section>
+
+<p class="note foot">Izmaiņas saglabājas šajā ierīcē.</p>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;");
+const DAYS=[["Pirmdiena","09.11."],["Otrdiena","10.11."],["Trešdiena","11.11."],["Ceturtdiena","12.11."],["Piektdiena","13.11."]];
+const SH=["Pr","Ot","Tr","Ce","Pk"];
+const K="Klienta dzīves kvalitātes nodrošināšana|Siliņa Benita";
+const IKT="Informācijas un komunikācijas tehnoloģijas (1., 2.līmenis)|Ungurs Guntis";
+const LV="Latviešu valoda un literatūra|Gončarova Irina";
+const VK="Valodas, kultūras izpratne un izpausmes (1., 2.līmenis)|Duškina Tatjana";
+const VV="Vācu valoda|Marhileviča Vija",MT="Matemātika I|Kirilova Jekaterina",AV="Angļu valoda I|Duškina Tatjana";
+const DEF=()=>[
+[K,K,K,"Sabiedrības un cilvēka drošība|Siliņa Benita","Audzināšana|Ostapko Svetlana, Siliņa Benita",IKT,IKT,IKT],
+[K,K,IKT,K,K,K,LV,LV],
+[K,K,K,VK,K,K],
+[K,K,K,VV,VV,VK,MT,MT],
+[AV,AV,K,K,"Dabaszinības|Romanovska-Dzalbe Evita",LV,LV]
+].map(d=>d.map(t=>({t,st:""})));
+const KEY="sched-v3",CK="ap1-changes-v1";
+const rd=(k,f)=>{try{const v=JSON.parse(localStorage.getItem(k)||"null");return v==null?f:v}catch(e){return f}};
+let ST=rd(KEY,null);
+if(!ST)ST={g:{AP1:rd("ap1-schedule-v2",null)||DEF()},cur:"AP1"};
+let C=rd(CK,[]);
+(function(){
+ if(rd("seeded-av12",0)||ST.g["AV1-2"])return;
+ const R=(t,n)=>Array(n).fill(t);
+ const DM="Demontāža un montāža|Krumpāns Juris",RP="Rasēšanas pamati|Duškina Tatjana",SZ="Sociālās zinības un vēsture|Bukeviča Dzintra";
+ const AU="Audzināšana|Markeviča Anita, Ostapko Svetlana",AU2="Automobiļu uzbūves pamati|Dzalbs Andris",FZ="Fizika I|Vagalis Aivars",DB="Dabaszinības|Romanovska-Dzalbe Evita";
+ const D=[[...R(LV,2),...R(AV,2),...R(DM,4)],[...R(RP,3),AU,...R(AV,2),...R(IKT,2)],[...R(MT,2),...R(SZ,2),...R(RP,4)],[...R(AU2,4),...R(DM,4)],[...R(FZ,2),...R(DB,2)]];
+ ST.g["AV1-2"]=D.map(d=>d.map(t=>({t,st:""})));
+ try{localStorage.setItem("seeded-av12","1")}catch(e){}
+ try{localStorage.setItem(KEY,JSON.stringify(ST))}catch(e){}
+})();
+(function(){
+ if(rd("seeded-dt13",0)||ST.g["DT1-3"])return;
+ const R=(t,n)=>Array(n).fill(t);
+ const SZ="Sociālās zinības un vēsture|Bukeviča Dzintra",FZ="Fizika I|Vagalis Aivars",DB="Dabaszinības|Romanovska-Dzalbe Evita";
+ const PU="Programmatūras uzturēšana|Gavars Raivis",PP="Preču un pakalpojumu izvēle EIKT infrastruktūras izveidei|Gavars Raivis";
+ const EN="EIKT nozares tehnisko darbu pamatiemaņas|Kušnire Daiga",VA="Vienkāršu algoritmu izstrāde|Kušnire Daiga",AU="Audzināšana|Kirilova Jekaterina, Ostapko Svetlana";
+ const D=[[...R(LV,2),...R(AV,2),PP,...R(PU,3)],[...R(EN,4),...R(AV,2),...R(IKT,2)],[...R(MT,2),...R(SZ,2),AU],[...R(PU,4),...R(VA,2),...R(EN,2)],[...R(FZ,2),...R(DB,2)]];
+ ST.g["DT1-3"]=D.map(d=>d.map(t=>({t,st:""})));
+ try{localStorage.setItem("seeded-dt13","1")}catch(e){}
+ try{localStorage.setItem(KEY,JSON.stringify(ST))}catch(e){}
+})();
+(function(){
+ if(rd("seeded-ts1",0)||ST.g["TS1"])return;
+ const R=(t,n)=>Array(n).fill(t);
+ const AU="Audzināšana|Markeviča Anita, Ostapko Svetlana",LA="Lekālu apstrāde|Zambare Ruta",PG="Piegriešana|Zambare Ruta";
+ const SZ="Sociālās zinības un vēsture|Bukeviča Dzintra",DB="Dabaszinības|Romanovska-Dzalbe Evita";
+ const DO="Darba organizācija šūto izstrādājumu izgatavošanā|Balule Iveta",TX="Tekstilmateriālu sagatavošana|Balule Iveta",KK="Komunikācija ar klientu|Balule Iveta";
+ const D=[[...R(LV,2),AU,...R(LA,5)],[...R(LA,4),...R(IKT,2),...R(DO,2)],[...R(MT,2),...R(SZ,2),...R(PG,4)],[...R(AV,2),...R(PG,2),...R(TX,2),...R(DO,2)],[...R(KK,2),...R(DB,2)]];
+ ST.g["TS1"]=D.map(d=>d.map(t=>({t,st:""})));
+ try{localStorage.setItem("seeded-ts1","1")}catch(e){}
+ try{localStorage.setItem(KEY,JSON.stringify(ST))}catch(e){}
+})();
+(function(){
+ if(rd("seeded-km1",0)||ST.g["KM1"])return;
+ const R=(t,n)=>Array(n).fill(t);
+ const KP="Kokrūpniecības nozares uzņēmuma pamatprocesi|Kuklis Jānis",AU="Audzināšana|Kuklis Jānis, Ostapko Svetlana",E="--";
+ const D=[R(KP,8),[...R(E,4),...R(KP,3),AU],[...R(E,4),...R(KP,4)],R(KP,4),R(KP,7)];
+ ST.g["KM1"]=D.map(d=>d.map(t=>({t,st:""})));
+ try{localStorage.setItem("seeded-km1","1")}catch(e){}
+ try{localStorage.setItem(KEY,JSON.stringify(ST))}catch(e){}
+})();
+(function(){
+ if(rd("seeded-ap2",0)||ST.g["AP2"])return;
+ const R=(t,n)=>Array(n).fill(t);
+ const MJ="Mājturības pamati|Balule Iveta",DB="Dabaszinības|Romanovska-Dzalbe Evita",VS="Klienta vispārējā vesebības stāvokļa un vitālo rādītāju novērtēšana|Siliņa Benita";
+ const KP="Klienta pamatvajadzību nodrošināšana|Kalviša Antra",SZ="Sociālās zinības un vēsture|Bukeviča Dzintra",KS="Klases stunda|Ostapko Svetlana, Siliņa Benita";
+ const AN="Angļu valoda|Duškina Tatjana",LL="Latviešu valoda I un Literatūra I|Gončarova Irina";
+ const D=[[...R(MJ,2),MT,...R(DB,2),...R(VS,3)],[...R(KP,4),...R(MJ,2),...R(AN,2)],[...R(SZ,2),VV,KS,...R(KP,4)],[...R(KP,4),...R(VS,4)],[...R(VV,2),VK,...R(LL,2),...R(DB,2)]];
+ ST.g["AP2"]=D.map(d=>d.map(t=>({t,st:""})));
+ try{localStorage.setItem("seeded-ap2","1")}catch(e){}
+ try{localStorage.setItem(KEY,JSON.stringify(ST))}catch(e){}
+})();
+(function(){
+ if(rd("seeded-av22",0)||ST.g["AV2-2"])return;
+ const R=(t,n)=>Array(n).fill(t);
+ const LZ="Latviešu valoda I un Literatūra I|Zariņa Ērika",VS="Virsbūves stiklojuma remonts|Dzalbs Andris",VT="Virsbūves taisnošana|Dzalbs Andris";
+ const AN="Angļu valoda|Duškina Tatjana",SZ="Sociālās zinības un vēsture|Bukeviča Dzintra",KS="Klases stunda|Markeviča Anita, Ostapko Svetlana";
+ const DB="Dabaszinības|Romanovska-Dzalbe Evita",FZ="Fizika I|Vagalis Aivars";
+ const D=[[...R(MT,2),...R(LZ,2),...R(VS,4)],[...R(LZ,2),...R(MT,2),...R(VT,4)],[...R(AN,3),"--",...R(SZ,2),LZ,MT],[...R(LZ,2),AN,KS,...R(VT,4)],[...R(DB,2),...R(FZ,2)]];
+ ST.g["AV2-2"]=D.map(d=>d.map(t=>({t,st:""})));
+ try{localStorage.setItem("seeded-av22","1")}catch(e){}
+ try{localStorage.setItem(KEY,JSON.stringify(ST))}catch(e){}
+})();
+(function(){
+ if(rd("seeded-dt23",0)||ST.g["DT2-3"])return;
+ const R=(t,n)=>Array(n).fill(t);
+ const LZ="Latviešu valoda I un Literatūra I|Zariņa Ērika",DD="Datortehnikas drošība|Gavars Raivis",PU="Programmatūras uzturēšana|Gavars Raivis";
+ const SZ="Sociālās zinības un vēsture|Bukeviča Dzintra",KS="Klases stunda|Markeviča Anita, Ostapko Svetlana",KP="Komunikācijas un prezentēšanas prasmes|Daņīleviča Velta";
+ const DB="Dabaszinības|Romanovska-Dzalbe Evita",FZ="Fizika I|Vagalis Aivars";
+ const D=[[...R(MT,2),...R(LZ,2),...R(AV,2),...R(VV,2)],[...R(LZ,2),...R(MT,2),...R(DD,2),...R(PU,2)],[...R(DD,2),...R(PU,2),...R(SZ,2),LZ,MT],[...R(LZ,2),KS,AV,...R(KP,4)],[...R(DB,2),...R(FZ,2)]];
+ ST.g["DT2-3"]=D.map(d=>d.map(t=>({t,st:""})));
+ try{localStorage.setItem("seeded-dt23","1")}catch(e){}
+ try{localStorage.setItem(KEY,JSON.stringify(ST))}catch(e){}
+})();
+(function(){
+ if(rd("seeded-ts2",0)||ST.g["TS2"])return;
+ const R=(t,n)=>Array(n).fill(t);
+ const SI="Šūto izstrādājumu izgatavošana|Zambare Ruta",SK="Šūto izstrādājumu konstruēšana un modelēšana|Zambare Ruta",MS="Modes un stilu attīstības vēsture|Balule Iveta";
+ const DB="Dabaszinības|Romanovska-Dzalbe Evita",AN="Angļu valoda|Duškina Tatjana",KS="Klases stunda|Markeviča Anita, Ostapko Svetlana";
+ const SZ="Sociālās zinības un vēsture|Bukeviča Dzintra",LZ="Latviešu valoda I un Literatūra I|Zariņa Ērika";
+ const D=[[...R(SI,3),...R(MT,2),...R(DB,2),AN],[KS,...R(MS,3),...R(SI,4)],[...R(SK,4),...R(VV,2),...R(SZ,2)],[...R(MT,2),...R(LZ,2),...R(SK,4)],[...R(MT,2),VV,AN,VK]];
+ ST.g["TS2"]=D.map(d=>d.map(t=>({t,st:""})));
+ try{localStorage.setItem("seeded-ts2","1")}catch(e){}
+ try{localStorage.setItem(KEY,JSON.stringify(ST))}catch(e){}
+})();
+(function(){
+ if(rd("seeded-mg22",0)||ST.g["MG2-2"])return;
+ const R=(t,n)=>Array(n).fill(t);
+ const KI="Ķīmija I|Romanovska-Dzalbe Evita",DB="Dabaszinības|Romanovska-Dzalbe Evita",AN="Angļu valoda|Duškina Tatjana";
+ const DK="Detaļu izgatavošana ar datorizētām kokapstrādes iekārtām|Vanags Normunds",KS="Klases stunda|Kuklis Jānis, Ostapko Svetlana",KM="Koksnes mehāniskā apstrāde I|Kuklis Jānis";
+ const SZ="Sociālās zinības un vēsture|Bukeviča Dzintra",LZ="Latviešu valoda I un Literatūra I|Zariņa Ērika",FZ="Fizika I|Vagalis Aivars";
+ const D=[[...R(KI,3),...R(MT,2),...R(DB,2),AN],R(DK,6),[KS,...R(KM,3),...R(VV,2),...R(SZ,2)],[...R(MT,2),...R(LZ,2),...R(KM,3)],[...R(MT,2),VV,AN,VK,...R(FZ,2)]];
+ ST.g["MG2-2"]=D.map(d=>d.map(t=>({t,st:""})));
+ try{localStorage.setItem("seeded-mg22","1")}catch(e){}
+ try{localStorage.setItem(KEY,JSON.stringify(ST))}catch(e){}
+})();
+(function(){
+ if(rd("seeded-dp35",0)||ST.g["DP3-5"])return;
+ const R=(t,n)=>Array(n).fill(t);
+ const PK="Programmatūras koda rakstīšana|Gavars Raivis",KS="Klases stunda|Ostapko Svetlana, Ungurs Guntis",DB="Datu bāzu tehnoloģijas",E="--";
+ const D=[[...R(PK,4),KS],[],[...R(E,4),...R(PK,4)],[...R(E,4),...R(DB,4)],R(PK,4)];
+ ST.g["DP3-5"]=D.map(d=>d.map(t=>({t,st:""})));
+ try{localStorage.setItem("seeded-dp35","1")}catch(e){}
+ try{localStorage.setItem(KEY,JSON.stringify(ST))}catch(e){}
+})();
+(function(){
+ if(rd("seeded-bg32",0)||ST.g["BG3-2"])return;
+ const R=(t,n)=>Array(n).fill(t);
+ const DK="Detaļu izgatavošana ar datorizētām kokapstrādes iekārtām|Vanags Normunds",BV="Būvizstrādājumu izgatavošanas procesa plānošana|Kuklis Jānis",E="--";
+ const D=[R(DK,8),R(BV,4),R(DK,7),[],[...R(E,4),...R(MT,3)]];
+ ST.g["BG3-2"]=D.map(d=>d.map(t=>({t,st:""})));
+ try{localStorage.setItem("seeded-bg32","1")}catch(e){}
+ try{localStorage.setItem(KEY,JSON.stringify(ST))}catch(e){}
+})();
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(ST))}catch(e){}};
+const saveC=()=>{try{localStorage.setItem(CK,JSON.stringify(C))}catch(e){}};
+const pal=["#3b5bdb","#e8590c","#2f9e44","#ae3ec9","#0c8599","#c2255c","#f08c00"],colors={};
+const col=n=>colors[n]||(colors[n]=pal[Object.keys(colors).length%pal.length]);
+const wd=(new Date().getDay()+6)%7;
+let curDay=wd<5?wd:0,loadDay=curDay,view="s";
+const G=()=>ST.g[ST.cur];
+const BELL=[["8.20","9.00"],["9.10","9.50"],["10.00","10.40"],["10.50","11.30"],["12.00","12.40"],["12.50","13.30"],["13.40","14.20"],["14.30","15.10"]];
+
+/* skats */
+const HS=(location.hash||"").slice(1);
+const MODE=HS==="admin"?"f":HS==="audzekni"?"a":"t";
+document.body.className=MODE==="f"?"":"m-r m-"+MODE;
+const ro=()=>{if(MODE!=="f")document.querySelectorAll("[contenteditable]").forEach(e=>e.removeAttribute("contenteditable"))};
+if(MODE!=="f")new MutationObserver(ro).observe(document.body,{childList:true,subtree:true});
+window.addEventListener("hashchange",()=>location.reload());
+document.querySelector(".sub").textContent+=MODE==="a"?" · audzēkņiem":MODE==="t"?" · skolotājiem":"";
+function setView(v){if((MODE!=="f"&&v==="l")||(MODE==="a"&&v==="d"))v="s";view=v;
+ document.querySelectorAll(".v").forEach(e=>e.classList.toggle("on",e.id==="v"+v));
+ document.querySelectorAll("#top button").forEach(b=>b.classList.toggle("on",b.dataset.v===v));
+ if(v==="s")rSched();if(v==="c")rChg();if(v==="l"||v==="d")rLoad();}
+$("top").onclick=e=>{const b=e.target.closest("button");if(b)setView(b.dataset.v)};
+
+/* saraksts */
+function rSched(){
+ $("gsel").innerHTML=Object.keys(ST.g).map(n=>`<option${n===ST.cur?" selected":""}>${esc(n)}</option>`).join("");
+ const app=$("app"),tabs=$("tabs");app.innerHTML="";tabs.innerHTML="";
+ DAYS.forEach((d,i)=>{
+  const el=document.createElement("section");el.className="day"+(i===wd?" today":"");el.dataset.i=i;
+  el.innerHTML=`<h2>${d[0]}<span>${d[1]}2026.</span></h2>`;
+  G()[i].forEach((x,j)=>{
+   const [s,t]=x.t.split("|");
+   const r=document.createElement("div");r.className="l "+(x.st||"");
+   r.innerHTML=`<div class="n" data-i="${i}" data-j="${j}">${j+1}.</div><div class="dot" style="background:${col(s)}"></div><div class="tm">${BELL[j]?BELL[j][0]+"<br>"+BELL[j][1]:""}</div><div class="s" contenteditable="true" data-i="${i}" data-j="${j}"><b>${esc(s)}</b>${t!==undefined?`<small>${esc(t)}</small>`:""}</div><button class="del" data-i="${i}" data-j="${j}" aria-label="Dzēst">&times;</button>`;
+   el.appendChild(r);
+  });
+  el.insertAdjacentHTML("beforeend",`<button class="add" data-i="${i}">+ Pievienot stundu</button>`);
+  app.appendChild(el);
+  const b=document.createElement("button");b.textContent=d[0];b.dataset.i=i;b.onclick=()=>showDay(i);tabs.appendChild(b);
+ });
+ showDay(curDay);
+}
+function showDay(i){curDay=i;
+ document.querySelectorAll("#app .day").forEach(e=>e.classList.toggle("show",+e.dataset.i===i));
+ document.querySelectorAll("#tabs button").forEach(e=>e.classList.toggle("on",+e.dataset.i===i));}
+$("app").addEventListener("input",e=>{
+ const s=e.target.closest(".s");if(!s)return;
+ const b=s.querySelector("b"),sm=s.querySelector("small");
+ G()[s.dataset.i][s.dataset.j].t=(b?b.textContent:s.textContent)+"|"+(sm?sm.textContent:"");save();});
+$("app").addEventListener("click",e=>{
+ const n=e.target.closest(".n");
+ if(n){const x=G()[n.dataset.i][n.dataset.j];x.st={"":"ch",ch:"x",x:""}[x.st||""];save();
+  n.parentElement.classList.remove("ch","x");if(x.st)n.parentElement.classList.add(x.st);return}
+ const d=e.target.closest(".del");
+ if(d){G()[d.dataset.i].splice(+d.dataset.j,1);save();rSched();return}
+ const a=e.target.closest(".add");
+ if(a){const i=+a.dataset.i;G()[i].push({t:"Jauna stunda|Pasniedzējs",st:"ch"});save();rSched();
+  const r=document.querySelectorAll('#app .day[data-i="'+i+'"] .s');r[r.length-1].focus();}
+});
+$("gsel").onchange=e=>{ST.cur=e.target.value;save();rSched()};
+$("gadd").onclick=()=>{const n=(prompt("Grupas nosaukums (piem., AP2):")||"").trim();
+ if(n&&!ST.g[n]){ST.g[n]=DAYS.map(()=>[]);ST.cur=n;save();rSched()}};
+$("gdel").onclick=()=>{if(Object.keys(ST.g).length<2)return alert("Jāpaliek vismaz vienai grupai.");
+ if(!confirm("Dzēst grupu "+ST.cur+"?"))return;delete ST.g[ST.cur];ST.cur=Object.keys(ST.g)[0];save();rSched()};
+$("reset").onclick=()=>{if(!confirm("Atjaunot sākotnējo sarakstu grupai "+ST.cur+"?"))return;
+ ST.g[ST.cur]=ST.cur==="AP1"?DEF():DAYS.map(()=>[]);save();rSched()};
+
+/* stundu izmaiņas */
+const PUB=[];
+function pubHtml(){return `<div class="card chg"><h3 style="margin:0 0 4px">Aktuālās izmaiņas</h3>`+(PUB.length?PUB.map(c=>`<div class="ci"><div class="cd">${esc(c.d)}</div><div class="cg">${esc(c.g)}</div><div class="cl">${esc(c.l)}</div><div class="ct">${esc(c.t)}</div></div>`).join(""):`<p class="empty">Izmaiņu nav.</p>`)+`</div>`}
+function rChg(){
+ if(MODE!=="f"){$("chg").innerHTML=pubHtml();return}
+ $("chg").innerHTML=pubHtml()+`<h3>Mani ieraksti (redzu tikai es)</h3><div class="card chg">`+(C.length?"":`<p class="empty">Izmaiņu nav.</p>`)+C.map((c,i)=>
+  `<div class="ci"><div class="cd" contenteditable="true" data-i="${i}" data-f="d" data-ph="datums">${esc(c.d)}</div><div class="cg" contenteditable="true" data-i="${i}" data-f="g" data-ph="grupa">${esc(c.g)}</div><div class="cl" contenteditable="true" data-i="${i}" data-f="l" data-ph="stunda">${esc(c.l)}</div><button class="del" data-i="${i}" aria-label="Dzēst">&times;</button><div class="ct" contenteditable="true" data-i="${i}" data-f="t" data-ph="kas mainījies">${esc(c.t)}</div></div>`).join("")+
+  `<button class="add" id="addc">+ Pievienot izmaiņas</button></div>`;
+}
+$("chg").addEventListener("input",e=>{const x=e.target.closest("[data-f]");if(!x)return;C[x.dataset.i][x.dataset.f]=x.textContent;saveC()});
+$("chg").addEventListener("click",e=>{
+ const d=e.target.closest(".del");
+ if(d){C.splice(+d.dataset.i,1);saveC();rChg();return}
+ if(e.target.closest("#addc")){const n=new Date(),p=v=>String(v).padStart(2,"0");
+  C.push({d:p(n.getDate())+"."+p(n.getMonth()+1)+".",g:"",l:"",t:""});saveC();rChg();
+  const f=$("chg").querySelectorAll('[data-f="g"]');f[f.length-1].focus();}
+});
+
+/* skolotāju noslodze */
+function calc(){const M={};
+ for(const gn in ST.g)ST.g[gn].forEach((day,i)=>day.forEach((x,j)=>{
+  if(x.st==="x")return;
+  (x.t.split("|")[1]||"").split(",").map(s=>s.trim()).filter(Boolean).forEach(tn=>{
+   M[tn]=M[tn]||{};M[tn][i]=M[tn][i]||{};M[tn][i][j]=M[tn][i][j]||[];M[tn][i][j].push({g:gn,s:x.t.split("|")[0]});});}));
+ return M;}
+function rLoad(){
+ const M=calc(),names=Object.keys(M).sort((a,b)=>a.localeCompare(b,"lv"));
+ if(!names.length){$("wk").innerHTML=`<p class="empty">Nav datu.</p>`;$("dd").innerHTML="";$("ltabs").innerHTML="";return}
+ let h=`<table><tr><th>Skolotājs</th>${SH.map(s=>`<th>${s}</th>`).join("")}<th>Kopā</th></tr>`;
+ names.forEach(n=>{let tot=0;
+  h+=`<tr><td>${esc(n)}</td>`+DAYS.map((_,i)=>{const c=Object.keys(M[n][i]||{}).length;tot+=c;return c?`<td class="b">${c}</td>`:`<td></td>`}).join("")+`<td><b>${tot}</b></td></tr>`;});
+ $("wk").innerHTML=h+"</table>";
+ $("ltabs").innerHTML=DAYS.map((d,i)=>`<button data-i="${i}" class="${i===loadDay?"on":""}">${d[0]} ${d[1]}</button>`).join("");
+ let max=8;for(const gn in ST.g)max=Math.max(max,ST.g[gn][loadDay].length);
+ let t=`<table><tr><th>Skolotājs</th>${Array.from({length:max},(_,j)=>`<th>${j+1}<br><small>${BELL[j]?BELL[j][0]+"–"+BELL[j][1]:""}</small></th>`).join("")}</tr>`;
+ names.forEach(n=>{t+=`<tr><td>${esc(n)}</td>`;
+  for(let j=0;j<max;j++){const g=(M[n][loadDay]||{})[j];
+   const subs=g?new Set(g.map(o=>o.s)):null;
+   t+=!g?`<td></td>`:subs.size>1?`<td class="clash">${esc(g.map(o=>o.g).join(", "))}</td>`:`<td class="b">${esc(g.map(o=>o.g).join("+"))}</td>`;}
+  t+="</tr>";});
+ $("dd").innerHTML=t+"</table>";
+}
+$("ltabs").onclick=e=>{const b=e.target.closest("button");if(b){loadDay=+b.dataset.i;rLoad()}};
+
+setView("s");
+</script>
+</body>
+</html>
