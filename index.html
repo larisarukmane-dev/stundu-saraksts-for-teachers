@@ -31,7 +31,7 @@ select,.sm{border:1px solid var(--line);background:var(--card);color:var(--tx);b
 .gb{width:44px;height:44px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:.8rem}
 .tm{width:40px;flex:none;font-size:.72rem;line-height:1.25;color:var(--mut);text-align:center}
 th small{font-weight:400;font-size:.72rem}
-.m-r .add,.m-r .del,.m-r .bar .sm,.m-r #reset,.m-r .adm,.m-r .foot,.m-r [data-v="l"],.m-a [data-v="d"]{display:none!important}
+.m-r .add,.m-r .del,.m-r .bar .sm,.m-r #reset,.m-r .adm,.m-r .foot,.m-r [data-v="l"],.m-a [data-v="d"],.m-a [data-v="k"]{display:none!important}
 .m-r .n{pointer-events:none}
 .m-a .s small{display:none}
 .s{flex:1;outline:none;min-width:0}
@@ -70,7 +70,7 @@ h3{margin:14px 0 4px;font-size:1.05rem}
 <div class="w">
 <h1>Stundu saraksts</h1>
 <p class="sub">09.11.2026. – 13.11.2026.</p>
-<div class="top" id="top"><button data-v="s">Saraksts</button><button data-v="c">Stundu izmaiņas</button><button data-v="d">Noslodze pa dienām</button><button data-v="l">Noslodze nedēļā</button></div>
+<div class="top" id="top"><button data-v="s">Saraksts</button><button data-v="c">Stundu izmaiņas</button><button data-v="k">Ciklogramma</button><button data-v="d">Noslodze pa dienām</button><button data-v="l">Noslodze nedēļā</button></div>
 
 <section class="v" id="vs">
  <div class="bar"><span id="gico"></span><select id="gsel"></select><button class="sm" id="gadd">+ Grupa</button><button class="sm" id="gdel">Dzēst grupu</button></div>
@@ -80,6 +80,8 @@ h3{margin:14px 0 4px;font-size:1.05rem}
 </section>
 
 <section class="v" id="vc"><div id="chg"></div></section>
+
+<section class="v" id="vk"><div id="cik"></div></section>
 
 <section class="v" id="vl">
  <h3>Stundu skaits nedēļā</h3>
@@ -250,10 +252,10 @@ const ro=()=>{if(MODE!=="f")document.querySelectorAll("[contenteditable]").forEa
 if(MODE!=="f")new MutationObserver(ro).observe(document.body,{childList:true,subtree:true});
 window.addEventListener("hashchange",()=>location.reload());
 document.querySelector(".sub").textContent+=MODE==="a"?" · audzēkņiem":MODE==="t"?" · skolotājiem":"";
-function setView(v){if((MODE!=="f"&&v==="l")||(MODE==="a"&&v==="d"))v="s";view=v;
+function setView(v){if((MODE!=="f"&&v==="l")||(MODE==="a"&&(v==="d"||v==="k")))v="s";view=v;
  document.querySelectorAll(".v").forEach(e=>e.classList.toggle("on",e.id==="v"+v));
  document.querySelectorAll("#top button").forEach(b=>b.classList.toggle("on",b.dataset.v===v));
- if(v==="s")rSched();if(v==="c")rChg();if(v==="l"||v==="d")rLoad();}
+ if(v==="s")rSched();if(v==="c")rChg();if(v==="l"||v==="d")rLoad();if(v==="k")rCik();}
 $("top").onclick=e=>{const b=e.target.closest("button");if(b)setView(b.dataset.v)};
 
 /* saraksts */
@@ -306,6 +308,20 @@ $("reset").onclick=()=>{if(!confirm("Atjaunot sākotnējo sarakstu grupai "+ST.c
 
 /* stundu izmaiņas */
 const PUB=[];
+const EV=[
+ {d:"2026-11-03",c:"🔵",t:"Angļu valodas novada olimpiāde 10.00–11.30"},
+ {d:"2026-11-09",c:"🟠",t:"Veselības diena (Papardes zieds nodarbības)"},
+ {d:"2026-11-10",c:"🟤",t:"Tikšanās ar SIA “Baltic Unmanned Solutions” pārstāvi (tēma – dronu tehnoloģijas) plkst. 14.00"},
+ {d:"2026-11-17",c:"🟠",t:"Koncertsaruna “Latviskums mūzikā, tradīcijās un jaunradē”"}
+];
+const LEG=[["🟤","Tikšanās ar uzņēmējiem"],["🟡","Profesionālās meistarības konkursi"],["🟠","Pasākumi"],["🟢","Sporta sacensības"],["🔴","Konkursi"],["🔵","Olimpiādes"],["🟣","Kursi"]];
+function rCik(){
+ const WD=["Svētdiena","Pirmdiena","Otrdiena","Trešdiena","Ceturtdiena","Piektdiena","Sestdiena"];
+ const n=new Date(),p2=v=>String(v).padStart(2,"0"),td=n.getFullYear()+"-"+p2(n.getMonth()+1)+"-"+p2(n.getDate());
+ const rows=EV.slice().sort((a,b)=>a.d<b.d?-1:1).map(e=>{const p=e.d.split("-"),dt=new Date(Date.UTC(+p[0],+p[1]-1,+p[2]));
+  return `<div class="ci" style="${e.d<td?"opacity:.55":""}"><div class="cd">${+p[2]}.${p[1]}.</div><div class="cl" style="min-width:90px">${WD[dt.getUTCDay()]}</div><div class="ct" style="flex:1 1 60%">${e.c} ${esc(e.t)}</div></div>`}).join("");
+ $("cik").innerHTML=`<div class="card chg"><h3 style="margin:0 0 4px">Aktivitāšu kalendārs · novembris 2026</h3>${rows||'<p class="empty">Nav ierakstu.</p>'}</div><p class="note">${LEG.map(l=>l[0]+" "+l[1]).join(" · ")}</p>`;
+}
 function pubHtml(){return `<div class="card chg"><h3 style="margin:0 0 4px">Aktuālās izmaiņas</h3>`+(PUB.length?PUB.map(c=>`<div class="ci"><div class="cd">${esc(c.d)}</div><div class="cg">${esc(c.g)}</div><div class="cl">${esc(c.l)}</div><div class="ct">${esc(c.t)}</div></div>`).join(""):`<p class="empty">Izmaiņu nav.</p>`)+`</div>`}
 function rChg(){
  if(MODE!=="f"){$("chg").innerHTML=pubHtml();return}
