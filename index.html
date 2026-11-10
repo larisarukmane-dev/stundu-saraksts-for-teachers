@@ -126,7 +126,7 @@ let C=rd(CK,[]);
  const R=(t,n)=>Array(n).fill(t);
  const DM="Demontāža un montāža|Krumpāns Juris",RP="Rasēšanas pamati|Duškina Tatjana",SZ="Sociālās zinības un vēsture|Bukeviča Dzintra";
  const AU="Audzināšana|Markeviča Anita, Ostapko Svetlana",AU2="Automobiļu uzbūves pamati|Dzalbs Andris",FZ="Fizika I|Vagalis Aivars",DB="Dabaszinības|Romanovska-Dzalbe Evita";
- const D=[[...R(LV,2),...R(AV,2),...R(DM,4)],[...R(RP,3),AU,...R(AV,2),...R(IKT,2)],[...R(MT,2),...R(SZ,2),...R(RP,4)],[...R(AU2,4),...R(DM,4)],[...R(FZ,2),...R(DB,2)]];
+ const D=[[...R(LV,2),...R(AV,2),...R(DM,4)],[...R(RP,3),AU,...R(AV,2),...R(IKT,2)],[...R(MT,2),...R(SZ,2),...R(AU2,4)],[...R(AU2,4),...R(DM,4)],[...R(FZ,2),...R(DB,2)]];
  ST.g["AV1-2"]=D.map(d=>d.map(t=>({t,st:""})));
  try{localStorage.setItem("seeded-av12","1")}catch(e){}
  try{localStorage.setItem(KEY,JSON.stringify(ST))}catch(e){}
@@ -137,7 +137,7 @@ let C=rd(CK,[]);
  const SZ="Sociālās zinības un vēsture|Bukeviča Dzintra",FZ="Fizika I|Vagalis Aivars",DB="Dabaszinības|Romanovska-Dzalbe Evita";
  const PU="Programmatūras uzturēšana|Gavars Raivis",PP="Preču un pakalpojumu izvēle EIKT infrastruktūras izveidei|Gavars Raivis";
  const EN="EIKT nozares tehnisko darbu pamatiemaņas|Kušnire Daiga",VA="Vienkāršu algoritmu izstrāde|Kušnire Daiga",AU="Audzināšana|Kirilova Jekaterina, Ostapko Svetlana";
- const D=[[...R(LV,2),...R(AV,2),PP,...R(PU,3)],[...R(EN,4),...R(AV,2),...R(IKT,2)],[...R(MT,2),...R(SZ,2),AU],[...R(PU,4),...R(VA,2),...R(EN,2)],[...R(FZ,2),...R(DB,2)]];
+ const D=[[...R(LV,2),...R(AV,2),PP,...R(PU,3)],[...R(PU,4),...R(AV,2),...R(IKT,2)],[...R(MT,2),...R(SZ,2),AU],[...R(PU,4),...R(VA,2),...R(EN,2)],[...R(FZ,2),...R(DB,2)]];
  ST.g["DT1-3"]=D.map(d=>d.map(t=>({t,st:""})));
  try{localStorage.setItem("seeded-dt13","1")}catch(e){}
  try{localStorage.setItem(KEY,JSON.stringify(ST))}catch(e){}
