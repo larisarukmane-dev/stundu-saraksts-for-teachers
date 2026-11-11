@@ -118,6 +118,8 @@ const DEF=()=>[
 const KEY="sched-v3",CK="ap1-changes-v1";
 const ADM=/#admin/.test(location.hash);
 const rd=(k,f)=>{if(!ADM)return f;try{const v=JSON.parse(localStorage.getItem(k)||"null");return v==null?f:v}catch(e){return f}};
+const APPVER="2026-11-10b";
+if(ADM){try{if(localStorage.getItem("appver")!==APPVER){Object.keys(localStorage).filter(k=>k==="sched-v3"||k==="ap1-schedule-v2"||k.indexOf("seeded-")===0).forEach(k=>localStorage.removeItem(k));localStorage.setItem("appver",APPVER)}}catch(e){}}
 let ST=rd(KEY,null);
 if(!ST)ST={g:{AP1:rd("ap1-schedule-v2",null)||DEF()},cur:"AP1"};
 let C=rd(CK,[]);
@@ -251,6 +253,7 @@ document.body.className=MODE==="f"?"":"m-r m-"+MODE;
 const ro=()=>{if(MODE!=="f")document.querySelectorAll("[contenteditable]").forEach(e=>e.removeAttribute("contenteditable"))};
 if(MODE!=="f")new MutationObserver(ro).observe(document.body,{childList:true,subtree:true});
 window.addEventListener("hashchange",()=>location.reload());
+if(MODE==="f")document.querySelector(".sub").textContent+=" · versija "+APPVER;
 document.querySelector(".sub").textContent+=MODE==="a"?" · audzēkņiem":MODE==="t"?" · skolotājiem":"";
 function setView(v){if((MODE!=="f"&&v==="l")||(MODE==="a"&&(v==="d"||v==="k")))v="s";view=v;
  document.querySelectorAll(".v").forEach(e=>e.classList.toggle("on",e.id==="v"+v));
@@ -303,8 +306,9 @@ $("gadd").onclick=()=>{const n=(prompt("Grupas nosaukums (piem., AP2):")||"").tr
  if(n&&!ST.g[n]){ST.g[n]=DAYS.map(()=>[]);ST.cur=n;save();rSched()}};
 $("gdel").onclick=()=>{if(Object.keys(ST.g).length<2)return alert("Jāpaliek vismaz vienai grupai.");
  if(!confirm("Dzēst grupu "+ST.cur+"?"))return;delete ST.g[ST.cur];ST.cur=Object.keys(ST.g)[0];save();rSched()};
-$("reset").onclick=()=>{if(!confirm("Atjaunot sākotnējo sarakstu grupai "+ST.cur+"?"))return;
- ST.g[ST.cur]=ST.cur==="AP1"?DEF():DAYS.map(()=>[]);save();rSched()};
+$("reset").onclick=()=>{if(!confirm("Atjaunot visus sarakstus no faila? Tavi labojumi šajā ierīcē tiks dzēsti."))return;
+ try{Object.keys(localStorage).filter(k=>k==="sched-v3"||k==="ap1-schedule-v2"||k.indexOf("seeded-")===0).forEach(k=>localStorage.removeItem(k))}catch(e){}
+ location.reload()};
 
 /* stundu izmaiņas */
 const PUB=[];
