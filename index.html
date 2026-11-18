@@ -69,7 +69,7 @@ h3{margin:14px 0 4px;font-size:1.05rem}
 <body>
 <div class="w">
 <h1>Stundu saraksts</h1>
-<p class="sub">09.11.2026. – 13.11.2026.</p>
+<p class="sub">16.11.2026. – 20.11.2026.</p>
 <div class="top" id="top"><button data-v="s">Saraksts</button><button data-v="c">Stundu izmaiņas</button><button data-v="k">Ciklogramma</button><button data-v="d">Noslodze pa dienām</button><button data-v="l">Noslodze nedēļā</button></div>
 
 <section class="v" id="vs">
@@ -101,7 +101,7 @@ h3{margin:14px 0 4px;font-size:1.05rem}
 <script>
 const $=id=>document.getElementById(id);
 const esc=s=>String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;");
-const DAYS=[["Pirmdiena","09.11."],["Otrdiena","10.11."],["Trešdiena","11.11."],["Ceturtdiena","12.11."],["Piektdiena","13.11."]];
+const DAYS=[["Pirmdiena","16.11."],["Otrdiena","17.11."],["Trešdiena","18.11."],["Ceturtdiena","19.11."],["Piektdiena","20.11."]];
 const SH=["Pr","Ot","Tr","Ce","Pk"];
 const K="Klienta dzīves kvalitātes nodrošināšana|Siliņa Benita";
 const IKT="Informācijas un komunikācijas tehnoloģijas (1., 2.līmenis)|Ungurs Guntis";
@@ -118,7 +118,7 @@ const DEF=()=>[
 const KEY="sched-v3",CK="ap1-changes-v1";
 const ADM=/#admin/.test(location.hash);
 const rd=(k,f)=>{if(!ADM)return f;try{const v=JSON.parse(localStorage.getItem(k)||"null");return v==null?f:v}catch(e){return f}};
-const APPVER="2026-11-10b";
+const APPVER="2026-11-16";
 if(ADM){try{if(localStorage.getItem("appver")!==APPVER){Object.keys(localStorage).filter(k=>k==="sched-v3"||k==="ap1-schedule-v2"||k.indexOf("seeded-")===0).forEach(k=>localStorage.removeItem(k));localStorage.setItem("appver",APPVER)}}catch(e){}}
 let ST=rd(KEY,null);
 if(!ST)ST={g:{AP1:rd("ap1-schedule-v2",null)||DEF()},cur:"AP1"};
